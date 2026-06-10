@@ -1,0 +1,74 @@
+.cdk-overlay-pane.app-error-dialog-panel {
+  width: min(420px, 92vw);
+  max-width: 92vw;
+}
+
+.app-error-dialog-panel .mat-mdc-dialog-surface {
+  border-radius: 16px;
+  border: 1px solid #e8eaed;
+  box-shadow: 0 8px 28px rgba(26, 115, 232, 0.12);
+  padding: 0;
+}
+
+.app-error-dialog-panel .mat-mdc-dialog-container .mdc-dialog__content {
+  padding: 0 1.5rem;
+}
+
+.error-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem 0;
+}
+
+.error-dialog-header .mat-mdc-dialog-title {
+  padding: 0;
+  margin: 0;
+}
+
+.error-dialog-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #fce8e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-dialog-icon mat-icon {
+  color: #d93025;
+  font-size: 26px;
+  width: 26px;
+  height: 26px;
+}
+
+.error-dialog-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #202124;
+  line-height: 1.3;
+}
+
+.error-dialog-content {
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.error-dialog-message {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: #5f6368;
+  line-height: 1.5;
+}
+
+.error-dialog-actions {
+  padding: 0.75rem 1rem 1.25rem !important;
+  gap: 0.5rem;
+}
+
+.error-dialog-actions .mat-mdc-button-base {
+  border-radius: 8px;
+  font-weight: 600;
+}

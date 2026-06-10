@@ -1,0 +1,14 @@
+.perfil-page .card {
+  max-width: 720px;
+  width: 100%;
+}
+
+@media (max-width: 575.98px) {
+  .perfil-page dl.row dt {
+    margin-bottom: 0.125rem;
+  }
+
+  .perfil-page dl.row dd {
+    margin-bottom: 0.75rem;
+  }
+}

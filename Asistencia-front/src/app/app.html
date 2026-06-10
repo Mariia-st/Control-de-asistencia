@@ -1,0 +1,137 @@
+@if (!isLoged()) {
+  <app-login></app-login>
+} @else {
+  <header class="app-header">
+    <div class="header-top">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <mat-icon>assignment_turned_in</mat-icon>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Control de Asistencia</span>
+          <span class="brand-subtitle">Sistema Educativo</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="nav-toggle"
+        (click)="toggleNav()"
+        [attr.aria-expanded]="navOpen()"
+        aria-controls="main-nav"
+        aria-label="Abrir o cerrar menú de navegación"
+      >
+        <mat-icon>{{ navOpen() ? 'close' : 'menu' }}</mat-icon>
+      </button>
+    </div>
+
+    <nav
+      id="main-nav"
+      class="main-nav"
+      [class.main-nav--open]="navOpen()"
+      aria-label="Principal"
+    >
+      @if (authState.isAdmin()) {
+        <a
+          routerLink="/admin"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-item"
+          (click)="closeNav()"
+        >
+          <mat-icon>admin_panel_settings</mat-icon>
+          <span>Administración</span>
+        </a>
+      } @else {
+        <a
+          [routerLink]="authState.homeRoute()"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-item"
+          (click)="closeNav()"
+        >
+          <mat-icon>home</mat-icon>
+          <span>Inicio</span>
+        </a>
+      }
+
+      @if (authState.isAlumno() && !authState.isProfesor() ) {
+        <a routerLink="/alumno/asistencia" routerLinkActive="active" class="nav-item" (click)="closeNav()">
+          <mat-icon>assignment_turned_in</mat-icon>
+          <span>Mi asistencia</span>
+        </a>
+      }
+
+      @if (authState.isProfesor() ) {
+        <a routerLink="/clases" routerLinkActive="active" class="nav-item" (click)="closeNav()">
+          <i class="fa-solid fa-chalkboard fa-lg" style="color: rgb(3, 3, 3)"></i>
+          <span>Mis clases</span>
+        </a>
+      }
+
+      @if ((authState.isProfesor()) && authState.canModificarAsistencia()) {
+        <a
+          routerLink="asistencia"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-item"
+          (click)="closeNav()"
+        >
+          <mat-icon>assignment_turned_in</mat-icon>
+          <span>Registro de Asistencia</span>
+        </a>
+      }
+
+      @if ((authState.isProfesor()) && authState.canListarAsistencia()) {
+        <a
+          routerLink="estadísticas"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-item"
+          (click)="closeNav()"
+        >
+          <mat-icon>bar_chart</mat-icon>
+          <span>Estadísticas</span>
+        </a>
+        <a
+          routerLink="historial"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-item"
+          (click)="closeNav()"
+        >
+          <mat-icon>history</mat-icon>
+          <span>Historial</span>
+        </a>
+      }
+
+      <a routerLink="/perfil" routerLinkActive="active" class="nav-item" (click)="closeNav()">
+        <mat-icon>person</mat-icon>
+        <span>Mi perfil</span>
+      </a>
+
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm nav-logout"
+        (click)="onLogOut(); closeNav()"
+      >
+        Log out
+      </button>
+    </nav>
+  </header>
+
+  <main>
+    <router-outlet />
+  </main>
+
+  <footer class="app-footer">
+    <div>
+      <h6>© 2026 Sistema de Control de Asistencia</h6>
+      <p>Diseñado para instituciones educativas</p>
+    </div>
+    <div>
+      <h6>Contacto</h6>
+      <p class="text-primary mb-0">maskastarik@gmail.com</p>
+    </div>
+  </footer>
+}

@@ -1,0 +1,144 @@
+<div class="px-3 px-md-4 pt-4 d-flex flex-column gap-4">
+  <div class="bg-brand text-white p-4 p-md-5 rounded-4">
+    <h2 class="fs-3 fs-md-2 mb-2">
+      Hola, {{ auth.me()?.name ?? 'Alumno' }}
+    </h2>
+    <p class="fw-light mb-0 fs-6">
+      Aquí puedes ver tus clases y unirte a nuevas con el código que te da tu profesor.
+    </p>
+    @if (!loadingAsistencia() && asistenciaHoy()) {
+      <div class="d-flex flex-wrap gap-2 mt-3">
+        <span class="badge rounded-pill px-3 py-2 badge-presente">
+          {{ resumenHoy().presentes }} presente(s)
+        </span>
+        <span class="badge rounded-pill px-3 py-2 badge-ausente">
+          {{ resumenHoy().ausentes }} ausente(s)
+        </span>
+        <span class="badge rounded-pill px-3 py-2 badge-sin-marcar">
+          {{ resumenHoy().sinMarcar }} sin marcar
+        </span>
+        <a routerLink="/alumno/asistencia" class="badge rounded-pill px-3 py-2 bg-white text-primary text-decoration-none">
+          Ver historial completo →
+        </a>
+      </div>
+    }
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <h5 class="fw-bold mb-3">
+        <i class="fa-solid fa-key me-2 text-primary"></i>
+        Unirse a una clase
+      </h5>
+      <form [formGroup]="codigoForm" (ngSubmit)="onUnirse()" class="row g-2 align-items-start">
+        <div class="col-12 col-md-8">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Introduce el código (ej: ABC123)"
+            formControlName="codigo"
+            maxlength="10"
+            style="text-transform: uppercase"
+          />
+          @if (codigoForm.controls.codigo.touched && codigoForm.controls.codigo.hasError('required')) {
+            <div class="text-danger small mt-1">El código es obligatorio</div>
+          }
+        </div>
+        <div class="col-12 col-md-4">
+          <button
+            type="submit"
+            class="btn btn-primary w-100"
+            [disabled]="codigoForm.invalid || joining()"
+          >
+            @if (joining()) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            Entrar a la clase
+          </button>
+        </div>
+      </form>
+
+      @if (success()) {
+        <div class="alert alert-success mt-3 mb-0 py-2">{{ success() }}</div>
+      }
+      @if (error()) {
+        <div class="alert alert-danger mt-3 mb-0 py-2">{{ error() }}</div>
+      }
+    </div>
+  </div>
+
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <h4 class="fw-bold m-0">Mis clases</h4>
+      <span class="badge bg-dark rounded-pill">{{ clases().length }}</span>
+    </div>
+
+    @if (loading()) {
+      <div class="d-flex justify-content-center align-items-center gap-3 py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <span class="text-muted">Cargando clases...</span>
+      </div>
+    } @else if (clases().length === 0) {
+      <div class="text-center py-5 bg-white rounded-4 border">
+        <i class="fa-solid fa-school fa-2x text-muted mb-3"></i>
+        <p class="text-muted mb-0">Aún no estás en ninguna clase.</p>
+        <p class="text-muted small">Pide el código a tu profesor y únete arriba.</p>
+      </div>
+    } @else {
+      <div class="row g-3">
+        @for (item of clases(); track item.id) {
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+              <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                  <div
+                    class="rounded-circle bg-light text-primary d-flex justify-content-center align-items-center"
+                    style="width: 48px; height: 48px"
+                  >
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                  </div>
+                  <div>
+                    <h5 class="fw-bold mb-0">{{ item.nombre }}</h5>
+                    <span class="text-muted small">
+                      <i class="fa-solid fa-door-open me-1"></i>Aula {{ item.aula }}
+                    </span>
+                  </div>
+                </div>
+                @if (item.codigo) {
+                  <span class="badge bg-light text-dark border">
+                    Código: {{ item.codigo }}
+                  </span>
+                }
+                <div class="mt-3">
+                  @if (loadingAsistencia()) {
+                    <span class="text-muted small">
+                      <span class="spinner-border spinner-border-sm me-1"></span>
+                      Cargando asistencia...
+                    </span>
+                  } @else {
+                    <span class="badge rounded-pill px-3 py-2" [class]="estadoClass(estadoHoy(item.id))">
+                      Hoy: {{ estadoLabel(estadoHoy(item.id)) }}
+                    </span>
+                  }
+                </div>
+                <div class="mt-3">
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger btn-sm"
+                    [disabled]="leavingId() === item.id"
+                    (click)="onSalirClase(item)"
+                  >
+                    @if (leavingId() === item.id) {
+                      <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    Salir de la clase
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

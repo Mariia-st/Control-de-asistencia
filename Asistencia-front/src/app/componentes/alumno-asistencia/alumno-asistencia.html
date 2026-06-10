@@ -1,0 +1,247 @@
+<div class="px-3 px-md-4 pt-4 d-flex flex-column gap-4 alumno-asistencia-page">
+  <div>
+    <h2 class="fs-3 fw-bold mb-1">Mi asistencia</h2>
+    <p class="text-muted mb-0">
+      Consulta tu historial y el resumen de los últimos días.
+      <a routerLink="/alumno/inicio" class="ms-1">Volver al inicio</a>
+    </p>
+  </div>
+
+  <div class="d-flex flex-wrap align-items-center gap-2">
+    <label class="form-label fw-semibold mb-0" for="dias-resumen">Resumen de</label>
+    <select
+      id="dias-resumen"
+      class="form-select form-select-sm w-auto"
+      [value]="diasResumen()"
+      [disabled]="loadingResumen()"
+      (change)="onDiasResumenChange($event)"
+    >
+      <option [value]="7">7 días</option>
+      <option [value]="30">30 días</option>
+      <option [value]="90">90 días</option>
+    </select>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-md-4">
+      <div class="bg-white rounded-3 border h-100 px-4 py-4 stat-card">
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <div class="stat-icon stat-icon-presente">
+            <i class="fa-solid fa-check"></i>
+          </div>
+          @if (loadingResumen()) {
+            <span class="spinner-border spinner-border-sm text-primary"></span>
+          } @else {
+            <span class="fs-2 fw-bold">{{ resumen()?.presentes ?? 0 }}</span>
+          }
+        </div>
+        <p class="text-muted mb-0">Presentes</p>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="bg-white rounded-3 border h-100 px-4 py-4 stat-card">
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <div class="stat-icon stat-icon-ausente">
+            <span class="fw-bold">A</span>
+          </div>
+          @if (loadingResumen()) {
+            <span class="spinner-border spinner-border-sm text-primary"></span>
+          } @else {
+            <span class="fs-2 fw-bold">{{ resumen()?.ausentes ?? 0 }}</span>
+          }
+        </div>
+        <p class="text-muted mb-0">Ausentes</p>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="bg-white rounded-3 border h-100 px-4 py-4 stat-card">
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <div class="stat-icon stat-icon-calendar">
+            <i class="fa-solid fa-percent"></i>
+          </div>
+          @if (loadingResumen()) {
+            <span class="spinner-border spinner-border-sm text-primary"></span>
+          } @else {
+            <span class="fs-2 fw-bold">{{ resumen()?.tasa_asistencia ?? 0 }}%</span>
+          }
+        </div>
+        <p class="text-muted mb-0">Tasa de asistencia</p>
+      </div>
+    </div>
+  </div>
+
+  @if (resumen()?.por_clase?.length) {
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3">Por clase</h5>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Clase</th>
+                <th>Aula</th>
+                <th class="text-center">Presentes</th>
+                <th class="text-center">Ausentes</th>
+                <th class="text-end">Tasa</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of resumen()!.por_clase; track item.clase_id) {
+                <tr>
+                  <td>{{ item.nombre }}</td>
+                  <td>{{ item.aula }}</td>
+                  <td class="text-center">{{ item.presentes }}</td>
+                  <td class="text-center">{{ item.ausentes }}</td>
+                  <td class="text-end fw-semibold">{{ item.tasa_asistencia }}%</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <h5 class="fw-bold mb-3">Historial</h5>
+      <div class="row g-3">
+        <div class="col-12 col-lg-4">
+          <label class="form-label fw-semibold" for="clase-filtro">Clase</label>
+          <select
+            id="clase-filtro"
+            class="form-select"
+            [disabled]="loadingClases()"
+            [value]="selectedIdClase() ?? ''"
+            (change)="onClaseSelected($event)"
+          >
+            <option value="">Todas mis clases</option>
+            @for (item of clases(); track item.id) {
+              <option [value]="item.id">{{ item.nombre }} — Aula {{ item.aula }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label fw-semibold" for="fecha-desde">Desde</label>
+          <input
+            id="fecha-desde"
+            type="date"
+            class="form-control"
+            [value]="fechaDesde()"
+            [disabled]="loadingHistorial()"
+            (change)="onFechaDesdeChange($event)"
+          />
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label fw-semibold" for="fecha-hasta">Hasta</label>
+          <input
+            id="fecha-hasta"
+            type="date"
+            class="form-control"
+            [value]="fechaHasta()"
+            [disabled]="loadingHistorial()"
+            (change)="onFechaHastaChange($event)"
+          />
+        </div>
+        <div class="col-12 col-lg-2 d-flex align-items-end gap-2">
+          <button
+            type="button"
+            class="btn btn-primary w-100"
+            [disabled]="loadingHistorial() || rangoInvalido()"
+            (click)="buscarHistorial()"
+          >
+            Buscar
+          </button>
+        </div>
+      </div>
+
+      @if (rangoInvalido()) {
+        <div class="alert alert-warning mt-3 mb-0 py-2">
+          La fecha «desde» no puede ser posterior a «hasta».
+        </div>
+      }
+
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2">
+        <button
+          type="button"
+          class="btn btn-link btn-sm text-secondary order-2 order-sm-1"
+          [disabled]="loadingHistorial()"
+          (click)="limpiarFiltro()"
+        >
+          Limpiar filtros
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline-primary btn-sm order-1 order-sm-2 ms-sm-auto"
+          [disabled]="totalRegistros() === 0 || loadingHistorial() || loadingPdf()"
+          (click)="descargarPdf()"
+        >
+          @if (loadingPdf()) {
+            <span class="spinner-border spinner-border-sm me-1"></span>
+            Generando PDF...
+          } @else {
+            <i class="fa-solid fa-file-pdf me-1"></i>
+            Descargar PDF
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger mb-0">{{ error() }}</div>
+  }
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      @if (loadingHistorial()) {
+        <div class="d-flex justify-content-center align-items-center gap-3 py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <span class="text-muted">Cargando historial...</span>
+        </div>
+      } @else if (registros().length === 0) {
+        <div class="text-center py-5">
+          <i class="fa-solid fa-clipboard-list fa-2x text-muted mb-3"></i>
+          <p class="text-muted mb-0">No hay registros de asistencia.</p>
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Fecha</th>
+                <th>Clase</th>
+                <th>Aula</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of registros(); track item.id) {
+                <tr>
+                  <td>{{ fechaRegistro(item) }}</td>
+                  <td>{{ item.clase?.nombre ?? '—' }}</td>
+                  <td>{{ item.clase?.aula ?? '—' }}</td>
+                  <td>
+                    <span class="badge rounded-pill px-3 py-2" [class]="estadoClass(item.estado)">
+                      {{ estadoLabel(item.estado) }}
+                    </span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="border-top px-3 py-2">
+          <mat-paginator
+            [length]="totalRegistros()"
+            [pageIndex]="pageIndex()"
+            [pageSize]="pageSize()"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="onPageChange($event)"
+            aria-label="Paginación del historial"
+          />
+        </div>
+      }
+    </div>
+  </div>
+</div>

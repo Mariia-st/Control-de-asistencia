@@ -1,0 +1,75 @@
+.history-empty {
+  border-color: #e8eaed !important;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.history-empty-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+}
+
+.history-empty-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #e8f0fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.history-empty-icon mat-icon {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  color: #1a73e8;
+}
+
+.history-empty-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #202124;
+  margin: 0 0 0.5rem;
+}
+
+.history-empty-text {
+  max-width: 420px;
+  margin: 0;
+  font-size: 0.9375rem;
+  color: #5f6368;
+  line-height: 1.5;
+}
+
+.badge-presente {
+  background-color: #e6f4ea;
+  color: #137333;
+}
+
+.badge-ausente {
+  background-color: #fce8e6;
+  color: #c5221f;
+}
+
+.history-paginator {
+  background: #fff;
+}
+
+@media (max-width: 575.98px) {
+  .history-empty-body {
+    padding: 2rem 1rem;
+  }
+
+  .history-page .d-flex.flex-wrap.justify-content-end {
+    justify-content: stretch !important;
+  }
+
+  .history-page .d-flex.flex-wrap.justify-content-end .btn {
+    flex: 1 1 auto;
+  }
+}

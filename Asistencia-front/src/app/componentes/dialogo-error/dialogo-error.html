@@ -1,0 +1,17 @@
+<div class="error-dialog-header">
+  <div class="error-dialog-icon" aria-hidden="true">
+    <mat-icon>error_outline</mat-icon>
+  </div>
+  <h2 mat-dialog-title class="error-dialog-title">{{ data.title ?? 'Error' }}</h2>
+</div>
+
+<mat-dialog-content class="error-dialog-content">
+  <p class="error-dialog-message">{{ data.message }}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="error-dialog-actions">
+  <button type="button" mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button type="button" mat-flat-button color="primary" (click)="onAccept()">
+    Aceptar
+  </button>
+</mat-dialog-actions>

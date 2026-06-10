@@ -1,0 +1,167 @@
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-icon" aria-hidden="true">
+      <mat-icon>assignment_turned_in</mat-icon>
+    </div>
+    <div class="brand-text">
+      <span class="brand-title">Asistencia +</span>
+      <span class="brand-subtitle">Sistema Educativo</span>
+    </div>
+  </div>
+</header>
+
+<main class="d-flex flex-column justify-content-center align-items-center px-3 py-4 flex-grow-1">
+    <form (ngSubmit)="onSubmit()"
+    [formGroup]="myForm"
+    class="login-card border border-2 rounded-5 p-4 d-flex flex-column justify-content-center align-items-center"
+    >
+    <div class="d-flex align-items-center gap-2">
+        <h1 class="text-center fw-bold">{{ isRegisterMode() ? 'Registro' : 'Login' }}</h1>
+        <i class="fa-regular fa-circle-user fa-2xl" style="color: rgb(3, 3, 3);"></i>
+
+    </div>
+    <p class="mb-2 text-secondary">
+      {{ isRegisterMode() ? 'Crea una cuenta nueva' : 'Introduzca sus credenciales' }}
+    </p>
+
+    @if (errorMessage()) {
+      <div class="alert alert-danger w-100 py-2 mb-3" role="alert">
+        {{ errorMessage() }}
+      </div>
+    }
+    
+    @if (isRegisterMode()) {
+      <div class="w-100 mb-4">
+        <label for="">Nombre</label>
+        <input
+          type="text"
+          class="form-control "
+          formControlName="name"
+          autocomplete="name"
+          [class.is-invalid]="myForm.controls.name.touched && myForm.controls.name.invalid"
+        />
+        @if (myForm.controls.name.touched && myForm.controls.name.hasError('required')) {
+          <div class="invalid-feedback d-block">Nombre es obligatorio</div>
+        }
+      </div>
+      <div class="w-100 mb-4">
+        <label for="">Apellido</label>
+        <input
+          type="text"
+          class="form-control "
+          formControlName="apellido"
+          autocomplete="apellido"
+          [class.is-invalid]="myForm.controls.apellido.touched && myForm.controls.apellido.invalid"
+        />
+        @if (myForm.controls.apellido.touched && myForm.controls.apellido.hasError('required')) {
+          <div class="invalid-feedback d-block">Nombre es obligatorio</div>
+        }
+      </div>
+
+      <div class="w-100 mb-4">
+        <label for="">Rol</label>
+        <select
+          class="form-select"
+          formControlName="role"
+          [class.is-invalid]="myForm.controls.role.touched && myForm.controls.role.invalid"
+        >
+          <option value="alumno">Alumno</option>
+          <option value="profesor">Profesor</option>
+        </select>
+        @if (myForm.controls.role.touched && myForm.controls.role.hasError('required')) {
+          <div class="invalid-feedback d-block">Rol es obligatorio</div>
+        }
+      </div>
+    }
+
+    <div class="w-100 mb-4">
+        <label for="">Email</label>
+      <input
+        type="email"
+        class="form-control "
+        formControlName="email"
+        autocomplete="email"
+        [class.is-invalid]="myForm.controls.email.touched && myForm.controls.email.invalid"
+      />
+      @if (myForm.controls.email.touched && myForm.controls.email.hasError('required')) {
+        <div class="invalid-feedback d-block">Email es obligatorio</div>
+      }
+      @if (myForm.controls.email.touched && myForm.controls.email.hasError('email')) {
+        <div class="invalid-feedback d-block">El formato de email no es valido</div>
+      }
+    </div>
+
+    <div class="w-100 mb-4">
+      <label for="login-password">Contraseña</label>
+      <div class="password-field">
+        <input
+          id="login-password"
+          [type]="showPassword() ? 'text' : 'password'"
+          class="form-control"
+          formControlName="password"
+          [autocomplete]="isRegisterMode() ? 'new-password' : 'current-password'"
+          [class.is-invalid]="myForm.controls.password.touched && myForm.controls.password.invalid"
+        />
+        <button
+          type="button"
+          class="password-toggle"
+          (click)="toggleShowPassword()"
+          [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          [attr.aria-pressed]="showPassword()"
+        >
+          <i class="fa-solid" [class.fa-eye]="!showPassword()" [class.fa-eye-slash]="showPassword()"></i>
+        </button>
+      </div>
+      @if (myForm.controls.password.touched && myForm.controls.password.hasError('required')) {
+        <div class="invalid-feedback d-block">Contraseña es obligatoria</div>
+      }
+      @if (isRegisterMode() && myForm.controls.password.touched && myForm.controls.password.hasError('minlength')) {
+        <div class="invalid-feedback d-block">La contraseña debe tener al menos 6 caracteres</div>
+      }
+    </div>
+
+    @if (isRegisterMode()) {
+      <div class="w-100 mb-4">
+        <label for="login-password-confirm">Confirmar contraseña</label>
+        <input
+          id="login-password-confirm"
+          [type]="showPassword() ? 'text' : 'password'"
+          class="form-control"
+          formControlName="password_confirmation"
+          autocomplete="new-password"
+          [class.is-invalid]="(myForm.controls.password_confirmation.touched && myForm.controls.password_confirmation.invalid) || (myForm.controls.password_confirmation.touched && myForm.hasError('passwordMismatch'))"
+        />
+        @if (myForm.controls.password_confirmation.touched && myForm.controls.password_confirmation.hasError('required')) {
+          <div class="invalid-feedback d-block">Confirmación es obligatoria</div>
+        }
+        @if (myForm.controls.password_confirmation.touched && myForm.hasError('passwordMismatch')) {
+          <div class="invalid-feedback d-block">Las contraseñas no coinciden</div>
+        }
+      </div>
+    }
+
+    <div>
+      <button type="submit" [disabled]="myForm.invalid || loading()" class="btn bg-brand text-white px-4">
+        @if (loading()) {
+          <span class="spinner-border spinner-border-sm me-1"></span>
+        }
+        {{ isRegisterMode() ? 'Crear cuenta' : 'Entrar' }}
+      </button>
+    </div>
+
+    <button type="button" class="btn btn-link mt-2" (click)="toggleMode()">
+      {{ isRegisterMode() ? 'Ya tengo cuenta, ir a login' : 'No tengo cuenta, registrarme' }}
+    </button>
+  </form>
+</main>
+
+<footer class="app-footer">
+  <div>
+    <h6>© 2026 Sistema de Control de Asistencia</h6>
+    <p>Diseñado para instituciones educativas</p>
+  </div>
+  <div>
+    <h6>Contacto</h6>
+    <p class="text-primary">maskastarik@gmail.com</p>
+  </div>
+</footer>

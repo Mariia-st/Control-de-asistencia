@@ -1,0 +1,150 @@
+<div class="px-3 px-md-4 pt-4 pb-5 attendance-page">
+  <div class="mb-4">
+    <h2 class="fs-3 fw-bold mb-1">Registro de Asistencia</h2>
+    <p class="text-muted mb-0">Marca la asistencia por clase y fecha.</p>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label fw-semibold" for="clase-select">Clase</label>
+          <select
+            id="clase-select"
+            class="form-select"
+            [disabled]="loading()"
+            (change)="onClaseChange($event)"
+          >
+            <option value="">Selecciona una clase</option>
+            @for (clase of clases(); track clase.id) {
+              <option [value]="clase.id">{{ clase.nombre }} — Aula {{ clase.aula }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label fw-semibold" for="fecha-input">Fecha</label>
+          <input
+            id="fecha-input"
+            type="date"
+            class="form-control"
+            [value]="fecha()"
+            [disabled]="loading() || !selectedClaseId()"
+            (change)="onFechaChange($event)"
+          />
+        </div>
+      </div>
+
+      @if (selectedClase()) {
+        <p class="text-muted small mb-0 mt-3">
+          {{ selectedClase()!.nombre }} · {{ alumnos().length }} alumno(s)
+        </p>
+      }
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger" role="alert">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="d-flex justify-content-center align-items-center gap-3 py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+      <span>Cargando...</span>
+    </div>
+  } @else if (!selectedClaseId()) {
+    <div class="alert alert-light border text-center py-5">
+      Selecciona una clase para ver los alumnos y marcar asistencia.
+    </div>
+  } @else if (alumnos().length === 0) {
+    <div class="alert alert-light  text-center py-4">
+      Esta clase no tiene alumnos registrados.
+    </div>
+  } @else {
+    <div class="list-group ">
+      <div class="attendance-actions my-2 px-1">
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="marcar-todos-presentes"
+            [checked]="todosPresentes()"
+            [disabled]="loading()"
+            (change)="marcarTodosComoPresentes($event)"
+          />
+          <label class="form-check-label fw-semibold" for="marcar-todos-presentes">
+            Marcar todos como presentes
+          </label>
+        </div>
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="marcar-todos-ausentes"
+            [checked]="todosAusentes()"
+            [disabled]="loading()"
+            (change)="marcarTodosComoAusentes($event)"
+          />
+          <label class="form-check-label fw-semibold" for="marcar-todos-ausentes">
+            Marcar todos como ausentes
+          </label>
+        </div>
+        <button
+          class="btn btn-outline-dark"
+          type="button"
+          [disabled]="loading()"
+          (click)="markAsistencia()"
+        >
+          Modificar asistencia
+        </button>
+      </div>
+      @for (alumno of alumnos(); track alumno.id) {
+        <div
+          class="list-group-item d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 py-3"
+        >
+          <div>
+            <h6 class="mb-0 fw-bold">{{ alumno.nombre }} {{ alumno.apellido }}</h6>
+            <small class="text-muted">{{ alumno.email }}</small>
+          </div>
+
+          <div class="btn-group-actions">
+            @if(!alumno.asistencia){
+
+              <span class="text-muted small">sin marcar</span>
+            }
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-success]="isPresente(alumno)"
+              [class.btn-outline-success]="!isPresente(alumno)"
+              [disabled]="savingAlumnoId() === alumno.id"
+              (click)="setPendiente(alumno,'presente')"
+          
+            >
+              @if (savingAlumnoId() === alumno.id) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              Presente
+            </button>
+            <button
+              type="button"
+              class="btn btn-sm"
+              [class.btn-danger]="isAusente(alumno)"
+              [class.btn-outline-danger]="!isAusente(alumno)"
+              [disabled]="savingAlumnoId() === alumno.id"
+              (click)="setPendiente(alumno,'ausente')"
+             
+            >
+              @if (savingAlumnoId() === alumno.id) {
+                <span class="spinner-border spinner-border-sm me-1"></span>
+              }
+              Ausente
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,197 @@
+<div class="px-3 px-md-4 pt-4 history-page">
+  <div class="mb-4">
+    <h2 class="fs-3 fw-bold mb-1">Historial de asistencia</h2>
+    <p class="text-muted mb-0">
+      Al elegir una clase verás el historial de hoy. Ajusta fechas o nombre y pulsa Buscar.
+    </p>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-12 col-lg-3">
+          <label class="form-label fw-semibold" for="clase-historial">Clase</label>
+          <select
+            id="clase-historial"
+            class="form-select"
+            [disabled]="loadingClases()"
+            [value]="selectedIdClase() ?? ''"
+            (change)="onClaseSelected($event)"
+          >
+            <option value="">Selecciona una clase</option>
+            @for (item of clases(); track item.id) {
+              <option [value]="item.id">{{ item.nombre }} — Aula {{ item.aula }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label fw-semibold" for="fecha-desde">Desde</label>
+          <input
+            id="fecha-desde"
+            type="date"
+            class="form-control"
+            [value]="fechaDesde()"
+            [disabled]="!selectedIdClase() || loadingHistorial()"
+            (change)="onFechaDesdeChange($event)"
+          />
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3">
+          <label class="form-label fw-semibold" for="fecha-hasta">Hasta</label>
+          <input
+            id="fecha-hasta"
+            type="date"
+            class="form-control"
+            [value]="fechaHasta()"
+            [disabled]="!selectedIdClase() || loadingHistorial()"
+            (change)="onFechaHastaChange($event)"
+          />
+        </div>
+        <div class="col-12 col-lg-3">
+          <label class="form-label fw-semibold" for="filtro-nombre">Nombre alumno</label>
+          <input
+            id="filtro-nombre"
+            type="search"
+            class="form-control"
+            placeholder="Nombre o apellido"
+            [value]="filtroNombre()"
+            [disabled]="!selectedIdClase() || loadingHistorial() || loadingPdf()"
+            (input)="onFiltroNombreInput($event)"
+          />
+        </div>
+      </div>
+
+      <div class="d-flex flex-wrap justify-content-end gap-2 mt-3">
+        @if (auth.canListarAsistencia()) {
+        <button
+          type="button"
+          class="btn btn-outline-primary btn-sm"
+          [disabled]="
+            !selectedIdClase() || totalRegistros() === 0 || loadingHistorial() || loadingPdf()
+          "
+          (click)="descargarPdf()"
+        >
+          @if (loadingPdf()) {
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            Generando PDF...
+          } @else {
+            <i class="fa-solid fa-file-pdf me-1" aria-hidden="true"></i>
+            Descargar PDF
+          }
+        </button>
+        }
+        <button
+          type="button"
+          class="btn btn-outline-secondary btn-sm"
+          [disabled]="!selectedIdClase() || loadingHistorial() || loadingPdf()"
+          (click)="limpiarFiltro()"
+        >
+          Limpiar filtro
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          [disabled]="!selectedIdClase() || loadingHistorial() || loadingPdf() || rangoInvalido()"
+          (click)="buscarHistorial()"
+        >
+          Buscar
+        </button>
+      </div>
+
+      @if (selectedIdClase()) {
+        <small class="text-muted d-block mt-2">
+          Rango: {{ rangoLabel() }}
+          @if (filtroNombre().trim()) {
+            · Alumno: «{{ filtroNombre().trim() }}»
+          }
+        </small>
+        @if (rangoInvalido()) {
+          <div class="text-danger small mt-1">
+            El rango de fechas no es valido: "Desde" no puede ser mayor que "Hasta".
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger" role="alert">{{ error() }}</div>
+  }
+
+  @if (!selectedIdClase()) {
+    <p class="text-muted mb-0">
+      <i class="fa-solid fa-arrow-up me-2"></i>Selecciona una clase para ver el historial de hoy
+    </p>
+  } @else if (loadingHistorial() && registros().length === 0) {
+    <div class="d-flex justify-content-center align-items-center gap-3 py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando historial...</span>
+      </div>
+      <span class="text-muted">Cargando historial...</span>
+    </div>
+  } @else if (registros().length === 0 && !loadingHistorial()) {
+    <div class="history-empty card border shadow-sm">
+      <div class="history-empty-body">
+        <div class="history-empty-icon" aria-hidden="true">
+          <mat-icon>schedule</mat-icon>
+        </div>
+        <h3 class="history-empty-title">No hay historial de asistencia</h3>
+        <p class="history-empty-text">
+          No hay registros con estos filtros. Prueba otras fechas, otro nombre o marca asistencia en
+          registro.
+        </p>
+        <a routerLink="/asistencia" class="btn btn-primary btn-sm mt-2">
+          Ir a registro de asistencia
+        </a>
+      </div>
+    </div>
+  } @else {
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive" [class.opacity-50]="loadingHistorial()">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+              <tr>
+                <th class="ps-4 py-3 text-uppercase small fw-bold">Fecha</th>
+                <th class="py-3 text-uppercase small fw-bold">Alumno</th>
+                <th class="py-3 text-uppercase small fw-bold">Estado</th>
+                <th class="pe-4 py-3 text-uppercase small fw-bold text-end">Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of registros(); track item.id) {
+                <tr>
+                  <td class="ps-4">{{ item.fecha | date: 'dd/MM/yyyy' }}</td>
+                  <td>
+                    @if (item.alumno) {
+                      {{ item.alumno.nombre }} {{ item.alumno.apellido }}
+                    } @else {
+                      <span class="text-muted">—</span>
+                    }
+                  </td>
+                  <td>
+                    <span class="badge rounded-pill" [class]="estadoClass(item.estado)">
+                      {{ estadoLabel(item.estado) }}
+                    </span>
+                  </td>
+                  <td class="pe-4 text-end text-muted small">
+                    {{ item.alumno?.email ?? '—' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <mat-paginator
+          class="history-paginator border-top"
+          [length]="totalRegistros()"
+          [pageIndex]="pageIndex()"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="pageSizeOptions"
+          [disabled]="loadingHistorial()"
+          (page)="onPageChange($event)"
+          aria-label="Paginación del historial"
+        />
+      </div>
+    </div>
+  }
+</div>

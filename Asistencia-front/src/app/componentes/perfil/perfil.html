@@ -1,0 +1,82 @@
+<div class="px-3 px-md-4 pt-4 d-flex flex-column gap-4 perfil-page">
+  <div>
+    <h2 class="fs-3 fw-bold mb-1">Mi perfil</h2>
+    <p class="text-muted mb-0">
+      <a [routerLink]="auth.homeRoute()">
+        @if (auth.isAdmin()) {
+          Volver a administración
+        } @else {
+          Volver al inicio
+        }
+      </a>
+    </p>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <h5 class="fw-bold mb-3">Datos de la cuenta</h5>
+      <dl class="row mb-0">
+        <dt class="col-sm-3 text-muted">Nombre</dt>
+        <dd class="col-sm-9">{{ auth.me()?.name ?? '—' }}</dd>
+        <dt class="col-sm-3 text-muted">Email</dt>
+        <dd class="col-sm-9">{{ auth.me()?.email ?? '—' }}</dd>
+        <dt class="col-sm-3 text-muted">Rol</dt>
+        <dd class="col-sm-9">{{ auth.role().join(', ') || '—' }}</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <h5 class="fw-bold mb-3">Cambiar contraseña</h5>
+
+      @if (success()) {
+        <div class="alert alert-success py-2">{{ success() }}</div>
+      }
+      @if (error()) {
+        <div class="alert alert-danger py-2">{{ error() }}</div>
+      }
+
+      <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" class="row g-3">
+        <div class="col-12 col-md-6">
+          <label class="form-label fw-semibold" for="current-password">Contraseña actual</label>
+          <input
+            id="current-password"
+            type="password"
+            class="form-control"
+            formControlName="current_password"
+            autocomplete="current-password"
+          />
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label fw-semibold" for="new-password">Nueva contraseña</label>
+          <input
+            id="new-password"
+            type="password"
+            class="form-control"
+            formControlName="password"
+            autocomplete="new-password"
+          />
+        </div>
+        <div class="col-12 col-md-6">
+          <label class="form-label fw-semibold" for="confirm-password">Confirmar nueva contraseña</label>
+          <input
+            id="confirm-password"
+            type="password"
+            class="form-control"
+            formControlName="password_confirmation"
+            autocomplete="new-password"
+          />
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary" [disabled]="passwordForm.invalid || loading()">
+            @if (loading()) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+            }
+            Guardar contraseña
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

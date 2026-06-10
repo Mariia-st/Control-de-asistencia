@@ -1,0 +1,51 @@
+.alumno-asistencia-page .stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.stat-icon-calendar {
+  background-color: #216ddf18;
+  color: #1a4ce1;
+}
+
+.stat-icon-presente {
+  background-color: #216ddf18;
+  color: #1a4ce1;
+}
+
+.stat-icon-ausente {
+  background-color: #6eb5ff33;
+  color: #1a4ce1;
+  font-size: 1.1rem;
+}
+
+.badge-presente {
+  background-color: #1a4ce1;
+  color: #fff;
+}
+
+.badge-ausente {
+  background-color: #6eb5ff;
+  color: #1a4ce1;
+}
+
+@media (max-width: 575.98px) {
+  .alumno-asistencia-page .d-flex.justify-content-between {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.5rem;
+  }
+
+  .alumno-asistencia-page .d-flex.justify-content-between .btn {
+    width: 100%;
+  }
+
+  .alumno-asistencia-page .stat-card .fs-2 {
+    font-size: 1.5rem !important;
+  }
+}

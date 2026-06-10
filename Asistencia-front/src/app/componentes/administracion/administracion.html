@@ -1,0 +1,225 @@
+<div class="px-3 px-md-4 pt-4 d-flex flex-column gap-4 admin-page">
+  <div>
+    <h2 class="fs-3 fw-bold mb-1">Panel de administración</h2>
+    <p class="text-muted mb-0">Gestión de usuarios, roles y resumen del sistema.</p>
+  </div>
+
+  @if (success()) {
+    <div class="alert alert-success py-2 mb-0">{{ success() }}</div>
+  }
+  @if (error()) {
+    <div class="alert alert-danger py-2 mb-0">{{ error() }}</div>
+  }
+
+  <section aria-label="Resumen del sistema">
+    <h5 class="fw-bold mb-3">Resumen</h5>
+    @if (loading() && !dashboard()) {
+      <div class="text-muted py-3">
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Cargando resumen...
+      </div>
+    } @else if (dashboard(); as stats) {
+      <div class="row g-3">
+        <div class="col-6 col-md-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+              <div class="display-6 fw-bold text-primary">{{ stats.usuarios }}</div>
+              <div class="text-muted small">Usuarios</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+              <div class="display-6 fw-bold text-danger">{{ stats.usuarios_por_rol.admin }}</div>
+              <div class="text-muted small">Administradores</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+              <div class="display-6 fw-bold text-primary">{{ stats.usuarios_por_rol.profesor }}</div>
+              <div class="text-muted small">Profesores</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+              <div class="display-6 fw-bold text-success">{{ stats.usuarios_por_rol.alumno }}</div>
+              <div class="text-muted small">Alumnos</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+              <div class="display-6 fw-bold">{{ stats.clases }}</div>
+              <div class="text-muted small">Clases</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+              <div class="display-6 fw-bold">{{ stats.asistencias }}</div>
+              <div class="text-muted small">Registros de asistencia</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </section>
+
+  <section aria-label="Usuarios">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+      <h5 class="fw-bold mb-0">Usuarios</h5>
+      <span class="badge bg-secondary rounded-pill">{{ totalUsers() }} en total</span>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        @if (loadingUsers()) {
+          <div class="text-center text-muted py-5">
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Cargando usuarios...
+          </div>
+        } @else if (users().length === 0) {
+          <p class="text-muted text-center py-5 mb-0">No hay usuarios registrados.</p>
+        } @else {
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Rol actual</th>
+                  <th>Cambiar rol</th>
+                  <th class="text-end">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (user of users(); track user.id) {
+                  <tr>
+                    <td class="fw-semibold">{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                      @for (role of user.roles; track role) {
+                        <span class="badge rounded-pill me-1" [class]="roleBadgeClass(role)">
+                          {{ roleLabel(role) }}
+                        </span>
+                      }
+                    </td>
+                    <td>
+                      <select
+                        class="form-select form-select-sm"
+                        [ngModel]="pendingRole()[user.id]"
+                        (ngModelChange)="onRoleChange(user.id, $event)"
+                        [disabled]="savingUserId() === user.id"
+                      >
+                        @for (role of roles; track role) {
+                          <option [value]="role">{{ roleLabel(role) }}</option>
+                        }
+                      </select>
+                    </td>
+                    <td class="text-end">
+                      <div class="d-flex justify-content-end gap-2">
+                        @if (roleChanged(user)) {
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-primary"
+                            [disabled]="savingUserId() === user.id"
+                            (click)="saveRole(user)"
+                          >
+                            @if (savingUserId() === user.id) {
+                              <span class="spinner-border spinner-border-sm"></span>
+                            } @else {
+                              Guardar
+                            }
+                          </button>
+                        }
+                        @if (!isCurrentUser(user)) {
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-outline-danger"
+                            [disabled]="deletingUserId() === user.id"
+                            (click)="deleteUser(user)"
+                          >
+                            @if (deletingUserId() === user.id) {
+                              <span class="spinner-border spinner-border-sm"></span>
+                            } @else {
+                              Eliminar
+                            }
+                          </button>
+                        } @else {
+                          <span class="badge bg-light text-muted border align-self-center">Tú</span>
+                        }
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          @if (lastPage() > 1) {
+            <div class="d-flex justify-content-between align-items-center px-3 py-3 border-top">
+              <span class="text-muted small">Página {{ currentPage() }} de {{ lastPage() }}</span>
+              <div class="btn-group btn-group-sm">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  [disabled]="currentPage() <= 1"
+                  (click)="goToPage(currentPage() - 1)"
+                >
+                  Anterior
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  [disabled]="currentPage() >= lastPage()"
+                  (click)="goToPage(currentPage() + 1)"
+                >
+                  Siguiente
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </section>
+
+  <section aria-label="Roles y permisos">
+    <h5 class="fw-bold mb-3">Roles y permisos</h5>
+    <div class="row g-3">
+      @for (role of roleInfo(); track role.id) {
+        <div class="col-12 col-md-4">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+              <h6 class="fw-bold mb-2">
+                <span class="badge rounded-pill me-2" [class]="roleBadgeClass(role.name)">
+                  {{ roleLabel(role.name) }}
+                </span>
+              </h6>
+              @if (role.permissions.length === 0) {
+                <p class="text-muted small mb-0">Sin permisos asignados.</p>
+              } @else {
+                <ul class="list-unstyled small mb-0">
+                  @for (perm of role.permissions; track perm) {
+                    <li class="mb-1">
+                      <span class="text-success me-1">✓</span>{{ perm }}
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+
+  
+</div>

@@ -1,0 +1,179 @@
+<div class="px-3 px-md-4 pt-4 d-flex flex-column gap-4 statistics-page">
+  <div>
+    <h2 class="fs-3 fw-bold mb-1">Estadísticas</h2>
+    <p class="text-muted mb-0">Visualiza la asistencia de tus clases</p>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <label class="form-label fw-semibold" for="clase-estadisticas">Clase</label>
+      <select
+        id="clase-estadisticas"
+        class="form-select"
+        [disabled]="loadingClases()"
+        (change)="onClaseSelected($event)"
+      >
+        <option value="">Selecciona una clase</option>
+        @for (item of clases(); track item.id) {
+          <option [value]="item.id">{{ item.nombre }} — Aula {{ item.aula }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger mb-0" role="alert">{{ error() }}</div>
+  }
+
+  @if (!selectedIdClase()) {
+    <p class="text-muted mb-0">
+      <i class="fa-solid fa-arrow-up me-2"></i>Selecciona una clase para ver las estadísticas
+    </p>
+  } @else {
+    <div class="row g-3">
+      <div class="col-12 col-md-4">
+        <div class="bg-white rounded-3 border h-100 px-4 py-4 stat-card">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <div class="stat-icon stat-icon-calendar">
+              <i class="fa-regular fa-calendar-days"></i>
+            </div>
+            @if (loadingDatos()) {
+              <span class="spinner-border spinner-border-sm text-primary"></span>
+            } @else {
+              <span class="fs-2 fw-bold">{{ estadisticas()?.total ?? 0 }}</span>
+            }
+          </div>
+          <p class="text-muted mb-0">Total de Alumnos</p>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="bg-white rounded-3 border h-100 px-4 py-4 stat-card">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <div class="stat-icon stat-icon-presente">
+              <i class="fa-solid fa-arrow-trend-up"></i>
+            </div>
+            @if (loadingDatos()) {
+              <span class="spinner-border spinner-border-sm text-primary"></span>
+            } @else {
+              <span class="fs-2 fw-bold">{{ estadisticas()?.presentes_hoy ?? 0 }}</span>
+            }
+          </div>
+          <p class="text-muted mb-0">Presentes Hoy</p>
+          @if (!loadingDatos() && estadisticas(); as stats) {
+            <small class="text-muted">
+              {{ pctDelTotal(stats.presentes_hoy, stats.total) }}% del total
+            </small>
+          }
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="bg-white rounded-3 border h-100 px-4 py-4 stat-card">
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <div class="stat-icon stat-icon-ausente">
+              <span class="fw-bold">A</span>
+            </div>
+            @if (loadingDatos()) {
+              <span class="spinner-border spinner-border-sm text-primary"></span>
+            } @else {
+              <span class="fs-2 fw-bold">{{ estadisticas()?.ausentes_hoy ?? 0 }}</span>
+            }
+          </div>
+          <p class="text-muted mb-0">Ausentes Hoy</p>
+          @if (!loadingDatos() && estadisticas(); as stats) {
+            <small class="text-muted">
+              {{ pctDelTotal(stats.ausentes_hoy, stats.total) }}% del total
+            </small>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-12 col-lg-7">
+        <div class="bg-white rounded-3 border p-4 chart-panel h-100">
+          <h5 class="fw-semibold mb-4">Últimos 7 Días</h5>
+
+          @if (loadingDatos()) {
+            <div class="d-flex justify-content-center py-5">
+              <span class="spinner-border text-primary"></span>
+            </div>
+          } @else if (ultimos7Dias().length === 0) {
+            <p class="text-muted mb-0">Sin datos para mostrar.</p>
+          } @else {
+            <div class="bar-chart" role="img" aria-label="Gráfico de barras últimos 7 días">
+              <div class="bar-chart-y" [style.height.px]="chartBarMaxPx">
+                @for (tick of [maxBarValue(), maxBarValue() / 2, 0]; track tick) {
+                  <span>{{ tick | number: '1.0-0' }}</span>
+                }
+              </div>
+              <div class="bar-chart-main">
+                <div class="bar-chart-plot" [style.height.px]="chartBarMaxPx">
+                  @for (dia of ultimos7Dias(); track dia.fecha) {
+                    <div class="bar-group">
+                      <div class="bar-pair">
+                        <div
+                          class="bar bar-presente"
+                          [style.height.px]="barHeightPx(dia.presentes)"
+                          [class.bar-empty]="dia.presentes === 0"
+                          [title]="'Presentes: ' + dia.presentes"
+                        ></div>
+                        <div
+                          class="bar bar-ausente"
+                          [style.height.px]="barHeightPx(dia.ausentes)"
+                          [class.bar-empty]="dia.ausentes === 0"
+                          [title]="'Ausentes: ' + dia.ausentes"
+                        ></div>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <div class="bar-chart-labels">
+                  @for (dia of ultimos7Dias(); track dia.fecha) {
+                    <span class="bar-label">{{ dia.label }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+            <div class="chart-legend mt-3">
+              <span class="legend-item"><i class="legend-dot legend-presente"></i> Presentes</span>
+              <span class="legend-item"><i class="legend-dot legend-ausente"></i> Ausentes</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-5">
+        <div class="bg-white rounded-3 border p-4 chart-panel h-100">
+          <h5 class="fw-semibold mb-4">Distribución de Hoy</h5>
+
+          @if (loadingDatos()) {
+            <div class="d-flex justify-content-center py-5">
+              <span class="spinner-border text-primary"></span>
+            </div>
+          } @else if (distribucionHoy(); as dist) {
+            <div class="pie-wrap">
+              <div class="pie-chart" [style.background]="pieGradient()"></div>
+            </div>
+            <ul class="pie-legend list-unstyled mt-4 mb-0">
+              <li>
+                <span class="legend-dot legend-presente"></span>
+                Presentes:
+                {{ pctDelTotal(dist.presentes, dist.total) }}%
+              </li>
+              <li>
+                <span class="legend-dot legend-ausente"></span>
+                Ausentes: {{ pctDelTotal(dist.ausentes, dist.total) }}%
+              </li>
+              <li>
+                <span class="legend-dot legend-sin-marcar"></span>
+                Sin marcar: {{ pctDelTotal(dist.sinMarcar, dist.total) }}%
+              </li>
+            </ul>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

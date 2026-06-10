@@ -1,0 +1,24 @@
+.attendance-page .attendance-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+}
+
+.attendance-page .list-group-item .btn-group-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+@media (max-width: 575.98px) {
+  .attendance-page .list-group-item .btn-group-actions .btn {
+    flex: 1 1 calc(50% - 0.25rem);
+    min-width: 0;
+  }
+
+  .attendance-page .attendance-actions .btn-outline-dark {
+    width: 100%;
+  }
+}

@@ -1,0 +1,35 @@
+.bg-brand {
+  background-color: #1a4ce1e7 !important;
+}
+
+.badge-presente {
+  background-color: #fff;
+  color: #1a4ce1;
+}
+
+.badge-ausente {
+  background-color: #6eb5ff;
+  color: #1a4ce1;
+}
+
+.badge-sin-marcar {
+  background-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.card .badge-presente {
+  background-color: #1a4ce1;
+  color: #fff;
+}
+
+.card .badge-ausente {
+  background-color: #6eb5ff;
+  color: #1a4ce1;
+}
+
+.card .badge-sin-marcar {
+  background-color: #e9ecef;
+  color: #6c757d;
+  border: none;
+}

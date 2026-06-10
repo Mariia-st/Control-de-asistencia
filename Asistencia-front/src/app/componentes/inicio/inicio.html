@@ -1,0 +1,265 @@
+@if(loading()){
+  <div class="d-flex justify-content-center align-items-center gap-3 py-5 mb-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando datos...</span>
+    </div>
+    <span class="text-muted">Cargando datos...</span>
+  </div>
+
+}@else if(error()){
+  <div>
+    <h1 class="text-danger">{{error()}}</h1>
+  </div>
+}@else{
+
+  <div class="px-3 px-md-4 pt-4 d-flex flex-column gap-4">
+    <div class="bg-brand text-white p-4 p-md-5 rounded-4">
+      <h2 class="fs-3 fs-md-2">Bienvenido al Sistema de control de Asistencia</h2>
+      <h5 class="fw-light fs-6 fs-md-5">
+        Gestiona la asistencia de tus alumnos de manera eficiente y visualiza estadísticas en tiempo
+        real.
+      </h5>
+    </div>
+
+    <div class="d-flex gap-3">
+      <select class="w-100 w-md-50 form-select" (change)="onClaseSelected($event)" 
+      [value]="selectedIdClase()"  #claseSelect name="clases" id="clases">
+        @if(clase() && clase().length > 0){
+          <option value="">Elige clase</option>
+          @for(item of clase();track item){
+            <option [value]="item.id">{{item.nombre}}</option>
+          }
+        }@else{
+          <option value="no hay clases">No hay clases</option>
+        }
+      </select>
+     
+    
+    </div>
+
+    @if(claseSelect.value!=='' && clase().length>0){
+     
+<div class="row g-3 w-100 m-0 pb-2">
+  <div class="col-12 col-sm-6 col-lg-3">
+    <div class="bg-white rounded-2 border border-1 h-100 px-4 py-3">
+      <div class="d-flex align-items-end gap-2 pb-3">
+        <div
+          class="rounded-3 d-flex justify-content-center align-items-center"
+          style="width: 30px; height: 35px; background-color: #216ddf11"
+        >
+          <i class="fa-regular fa-user fa-lg" style="color: rgb(3, 91, 255)"></i>
+        </div>
+        <h5 class="mb-0">
+          @if (loadingEstadisticas()) {
+            <span class="spinner-border spinner-border-sm"></span>
+          } @else {
+            {{ estadisticas()?.total ?? selectedClaseData()?.alumnos?.length ?? 0 }}
+          }
+        </h5>
+      </div>
+      <h6 class="fw-light mb-0">Total de alumnos</h6>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-lg-3">
+    <div class="bg-white rounded-2 border border-1 h-100 px-4 py-3">
+      <div class="d-flex align-items-end gap-2 pb-3">
+        <div
+          class="rounded-3 d-flex justify-content-center align-items-center"
+          style="width: 30px; height: 35px; background-color: #21df5410"
+        >
+          <i class="fa-regular fa-circle-check fa-xl" style="color: rgb(13, 198, 35)"></i>
+        </div>
+        <h5 class="mb-0">
+          @if (loadingEstadisticas()) {
+            <span class="spinner-border spinner-border-sm"></span>
+          } @else {
+            {{ estadisticas()?.presentes_hoy ?? 0 }}
+          }
+        </h5>
+      </div>
+      <h6 class="fw-light mb-0">Presentes hoy</h6>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-lg-3">
+    <div class="bg-white rounded-2 border border-1 h-100 px-4 py-3">
+      <div class="d-flex align-items-end gap-2 pb-3">
+        <div
+          class="rounded-3 d-flex justify-content-center align-items-center"
+          style="width: 30px; height: 35px; background-color: #df212113"
+        >
+          <i class="fa-solid fa-a" style="color: rgb(255, 3, 3)"></i>
+        </div>
+        <h5 class="mb-0">
+          @if (loadingEstadisticas()) {
+            <span class="spinner-border spinner-border-sm"></span>
+          } @else {
+            {{ estadisticas()?.ausentes_hoy ?? 0 }}
+          }
+        </h5>
+      </div>
+      <h6 class="fw-light mb-0">Ausentes hoy</h6>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-lg-3">
+    <div class="bg-white rounded-2 border border-1 h-100 px-4 py-3">
+      <div class="d-flex align-items-end gap-2 pb-3">
+        <div
+          class="rounded-3 d-flex justify-content-center align-items-center"
+          style="width: 30px; height: 35px; background-color: #216ddf15"
+        >
+          <i class="fa-solid fa-arrow-trend-up" style="color: rgb(3, 91, 255)"></i>
+        </div>
+        <h5 class="mb-0">
+          @if (loadingEstadisticas()) {
+            <span class="spinner-border spinner-border-sm"></span>
+          } @else {
+            {{ estadisticas()?.tasa_asistencia ?? 0 }}%
+          }
+        </h5>
+      </div>
+      <h6 class="fw-light mb-0">Tasa de asistencia</h6>
+    </div>
+  </div>
+</div>
+
+
+    }@else if(clase().length===0 ){
+      <div>
+        <h6 class="text-secondary small">Tu lista de clases está vacía, comienza creando tu primera clase ...</h6>
+        @if (auth.canListarClases() && auth.canModificarClases()) {
+          <button class="btn btn-outline-dark" routerLink="/clases">Crear clases</button>
+        }
+      </div>
+      
+    }@else if(claseSelect.value!=='') {
+      
+      <div class="text-center py-4">
+        <p class="text-muted italic"><i class="fa-solid fa-arrow-up me-2"></i>Selecciona una clase arriba para ver las estadísticas</p>
+      </div>
+
+    }
+
+    
+
+    <div class="row g-3 w-100 m-0 pb-5">
+      <h4>Funciones Principales</h4>
+      @if (auth.canModificarAsistencia()) {
+      <div class="col-12 col-md-4">
+        <div class="bg-white rounded-2 border border-1 h-100 px-4 py-3 shadow-sm-hover">
+          <div class="pb-3">
+            <div
+              class="rounded-3 d-flex justify-content-center align-items-center"
+              style="width: 40px; height: 42px; background-color: rgb(3, 91, 255)"
+            >
+              <i class="fa-regular fa-calendar-check fa-xl" style="color: rgb(255, 255, 255)"></i>
+            </div>
+          </div>
+          <h5>Registro de Asistencia</h5>
+          <h6 class="fw-light mb-3">
+            Marca la asistencia diaria de todos los alumnos de forma rápida y sencilla.
+          </h6>
+          <a routerLink="/asistencia" routerLinkActive="active" class="text-decoration-none fw-bold">
+            <span>Ir al registro →</span>
+          </a>
+        </div>
+      </div>
+      }
+
+      @if (auth.canListarAsistencia()) {
+      <div class="col-12 col-md-4">
+        <div class="bg-white rounded-2 border border-1 h-100 px-4 py-3 shadow-sm-hover">
+          <div class="pb-3">
+            <div
+              class="rounded-3 d-flex justify-content-center align-items-center"
+              style="width: 40px; height: 42px; background-color: rgb(3, 91, 255)"
+            >
+              <i class="fa-solid fa-chart-column fa-lg" style="color: rgb(255, 255, 255)"></i>
+            </div>
+          </div>
+          <h5>Estadísticas</h5>
+          <h6 class="fw-light mb-3">
+            Visualiza el rendimiento y la asistencia general con gráficos detallados.
+          </h6>
+          <a routerLink="/estadísticas" routerLinkActive="active" class="text-decoration-none fw-bold">
+            <span>Ver estadísticas →</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-4">
+        <div class="bg-white rounded-2 border border-1 h-100 px-4 py-3 shadow-sm-hover">
+          <div class="pb-3">
+            <div
+              class="rounded-3 d-flex justify-content-center align-items-center"
+              style="width: 40px; height: 42px; background-color: rgb(3, 91, 255)"
+            >
+              <i class="fa-regular fa-calendar fa-xl" style="color: rgb(255, 255, 255)"></i>
+            </div>
+          </div>
+          <h5>Historial</h5>
+          <h6 class="fw-light mb-3">
+            Consulta registros pasados y filtra por fechas o alumnos fácilmente.
+          </h6>
+          <a routerLink="/historial" routerLinkActive="active" class="text-decoration-none fw-bold">
+            <span>Ver historial →</span>
+          </a>
+        </div>
+      </div>
+      }
+    </div>
+    <div class="row g-4 w-100 m-0 pb-5">
+      <div class="col-12 col-md-6">
+        <div class="bg-white rounded-4 border border-1 h-100 p-4 p-md-5 shadow-sm">
+          <h4 class="fw-bold mb-4">¿Cómo funciona?</h4>
+          <ul class="list-unstyled d-flex flex-column gap-3">
+            <li class="d-flex align-items-start gap-2">
+              <span class="text-primary fw-bold">•</span>
+              <span class="text-secondary">Selecciona la fecha en el calendario</span>
+            </li>
+            <li class="d-flex align-items-start gap-2">
+              <span class="text-primary fw-bold">•</span>
+              <span class="text-secondary">Marca cada alumno como presente o ausente</span>
+            </li>
+            <li class="d-flex align-items-start gap-2">
+              <span class="text-primary fw-bold">•</span>
+              <span class="text-secondary">Los datos se guardan automáticamente</span>
+            </li>
+            <li class="d-flex align-items-start gap-2">
+              <span class="text-primary fw-bold">•</span>
+              <span class="text-secondary"
+                >Consulta estadísticas e historial cuando lo necesites</span
+              >
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6">
+        <div class="bg-white rounded-4 border border-1 h-100 p-4 p-md-5 shadow-sm">
+          <h4 class="fw-bold mb-4">Características</h4>
+          <ul class="list-unstyled d-flex flex-column gap-3">
+            <li class="d-flex align-items-center gap-3">
+              <i class="fa-regular fa-circle-check text-success fs-5"></i>
+              <span class="text-secondary">Interfaz simple y fácil de usar</span>
+            </li>
+            <li class="d-flex align-items-center gap-3">
+              <i class="fa-regular fa-circle-check text-success fs-5"></i>
+              <span class="text-secondary">Gráficos estadísticos detallados</span>
+            </li>
+            <li class="d-flex align-items-center gap-3">
+              <i class="fa-regular fa-circle-check text-success fs-5"></i>
+              <span class="text-secondary">Exportación de datos a CSV</span>
+            </li>
+            <li class="d-flex align-items-center gap-3">
+              <i class="fa-regular fa-circle-check text-success fs-5"></i>
+              <span class="text-secondary">Historial completo de registros</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+}
